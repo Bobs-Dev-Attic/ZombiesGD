@@ -1,1 +1,1 @@
-Always use strict Godot 4.x syntax. Use await for signals, CharacterBody2D for moving entities, and the new 4.x Tween system.
+Always use strict Godot 4.x syntax. Use await for signals, CharacterBody3D for moving entities, and the new 4.x Tween system. Prefer orthographic Camera3D for top-down 3D. Keep gameplay input behind InputManager autoload.
