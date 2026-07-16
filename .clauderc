@@ -1,0 +1,1 @@
+Always use strict Godot 4.x syntax. Use await for signals, CharacterBody2D for moving entities, and the new 4.x Tween system.
