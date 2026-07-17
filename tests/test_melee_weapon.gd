@@ -42,8 +42,7 @@ func run() -> void:
 	)
 
 	# boundary inclusivity: exactly 30 degrees off-aim -> true for knife
-	var off_30 := Vector2(1.0, 1.0).rotated(0.0)
-	off_30 = Vector2(0.0, 1.0).rotated(deg_to_rad(30.0))
+	var off_30 := Vector2(0.0, 1.0).rotated(deg_to_rad(30.0))
 	check(
 		MeleeWeapon.is_in_arc(off_30, facing, 1),
 		"exactly 30 degrees off-aim is inclusive for knife"

@@ -138,10 +138,10 @@ func _try_melee_swing() -> void:
 		if collider == null or not collider.has_method("take_damage"):
 			continue
 		var to_target: Vector3 = collider.global_position - global_position
-		# intersect_shape's narrow-phase can report false positives for a
-		# sphere query against capsule targets well beyond its radius, so
-		# the distance is re-verified explicitly here rather than trusting
-		# the shape query alone for the reach cutoff.
+		# intersect_shape matches when a zombie's capsule overlaps the query
+		# sphere, which makes effective reach vary with capsule size. Measure
+		# centre-to-centre instead so reach means the same distance for every
+		# target.
 		if to_target.length() > reach:
 			continue
 		var to_target_xz := Vector2(to_target.x, to_target.z)
