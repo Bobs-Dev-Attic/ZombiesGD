@@ -22,6 +22,43 @@ Task 3: complete (commit 4e967ef, review clean — spec ✅, quality approved)
 Task 4: complete (commits 328b64a..7b5b089, review clean after fix — spec ✅, quality approved)
 Task 5: complete (commit da99885, review clean — spec ✅, quality approved)
 
+## Weapon system (v2 scope, branch feat/weapons, stacked on feat/zombies)
+
+User approved the design in conversation and asked to skip the spec doc. Design: three roles
+(RANGED/MELEE/THROWN) held simultaneously, no switching; two tiers each; tiers set base stats
+and per-role upgrades scale from them; cooldown-gated and infinite-use (NO ammo — preserves
+the v1 "no ammo management" non-goal). Melee auto-swings so mobile needs no third thumb.
+
+Weapon 1: complete (commit 82ed4a4, review clean) — per-role Upgrades rewrite + WeaponStats
+  roster + zombie hp<=0 guard. RANGED tier-1 reproduces the old gun exactly (verified).
+Weapon 2: complete (commit 2b4409c, review clean, zero findings) — Pistol -> Shotgun.
+  Deterministic spread [-10,-5,0,5,10], no RNG. Probe: t1 10.0 dmg, t2 point-blank 30.0
+  (5x6.0), t2 edge 6.0 (one outer pellet) — spread proven to be real geometry.
+Weapon 3: complete (commits 08f767c..422558c, review clean) — Knife -> Axe, auto-swing.
+  Arc centred on aim; whiff does NOT consume cooldown. Probe: 15.0/swing @ ~515ms, behind-aim
+  0 dmg, axe hits two zombies at +/-45deg.
+Weapon 4: complete (commit d1f1453, review clean) — Grenade -> Cluster, AOE, own button (G).
+  Probe: linear falloff 60.0/30.0/0.0 at centre/half-radius/outside; bomblet 5.0 at 4.0m
+  (= 20 * (1 - 1.5/2.0), so bomblets detonate at their own offsets); player self-damage
+  structurally impossible (player layer 1, blast masks layer 2).
+
+### IMPORTANT deferred item — MUST fix when the mobile throw button lands (Task 9)
+
+`InputManager.is_throw_pressed()` is a just-pressed EDGE for keyboard
+(`Input.is_action_just_pressed`) but returns `touch_throw` as a raw LEVEL for touch. Inert
+today because no on-screen throw button exists. When Task 9 wires a hold-to-throw button via
+`set_touch_throw(true)`, it will stream a grenade every cooldown tick instead of one per
+press — contradicting the function's own doc comment. Implement press/release edge detection
+in `set_touch_throw`.
+
+Also for Task 9: `player.gd::THROW_FALLBACK_DISTANCE` (6.0 units straight ahead) is the
+throw target when there is no mouse ground point — i.e. the entire touch path. Unspecified
+default invented by the implementer; revisit once a real touch throw button exists.
+
+Also still open from Task 4: the `touch_enabled` latch is one-way — once a joystick tap flips
+it true there is no path back to keyboard. Only bites hybrid touchscreen laptops (the user
+HAS one). Confirm behaviour when Task 9 lands.
+
 ## Minor findings deferred to final whole-branch review
 
 - Task 2: `move_speed()` and `max_hp()` are only tested at level-0 base values; a
