@@ -6,6 +6,20 @@ screen) always matches the latest entry here and `scripts/version.gd`.
 Versioning is semantic-ish while pre-1.0: MINOR for a new gameplay system,
 PATCH for fixes and small additions.
 
+## [0.5.0] - 2026-07-17
+
+### Added
+- **The loop is closed.** Full UI layer over the wave loop:
+  - **HUD** (top-left): live HP, Points, and Wave.
+  - **Between-wave shop:** opens on wave clear. Spend points on Move Speed, Max HP,
+    and per-role Damage / Fire Rate / weapon-tier upgrades (Pistol→Shotgun,
+    Knife→Axe, Grenade→Cluster). Buttons show live costs and grey out when
+    unaffordable or maxed. "Next Wave" starts the next wave.
+  - **Game Over overlay** with a Retry button that starts a fresh run.
+- Weapons are disabled outside the PLAYING state (can't fire in the shop or after
+  death); movement stays active.
+- `HOW_TO_PLAY.md` — player-facing guide to controls, weapons, and the shop.
+
 ## [0.4.0] - 2026-07-17
 
 ### Added

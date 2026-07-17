@@ -11,6 +11,7 @@ const TESTS: PackedStringArray = [
 	"res://tests/test_input_manager.gd",
 	"res://tests/test_player.gd",
 	"res://tests/test_zombie.gd",
+	"res://tests/test_shop_helpers.gd",
 ]
 
 

@@ -75,13 +75,19 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_update_aim(move2)
 	_fire_timer = maxf(0.0, _fire_timer - delta)
+	_melee_timer = maxf(0.0, _melee_timer - delta)
+	_throw_timer = maxf(0.0, _throw_timer - delta)
+	# Weapons only act during PLAYING (not SHOP/GAME_OVER); movement and aim
+	# above stay always-active so the player can still walk around in the
+	# shop and under the game-over overlay. Timers keep ticking either way so
+	# a weapon does not fire the instant PLAYING resumes mid-cooldown.
+	if GameManager.state != GameManager.State.PLAYING:
+		return
 	if InputManager.is_fire_held() and _fire_timer <= 0.0:
 		_fire()
 		_fire_timer = upgrades.cooldown(WeaponStats.Role.RANGED)
-	_melee_timer = maxf(0.0, _melee_timer - delta)
 	if _melee_timer <= 0.0:
 		_try_melee_swing()
-	_throw_timer = maxf(0.0, _throw_timer - delta)
 	if InputManager.is_throw_pressed() and _throw_timer <= 0.0:
 		_throw_grenade()
 		_throw_timer = upgrades.cooldown(WeaponStats.Role.THROWN)
