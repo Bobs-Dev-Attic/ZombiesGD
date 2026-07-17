@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://cvzversionlabel1"]
+
+[ext_resource type="Script" path="res://scripts/version_label.gd" id="1"]
+
+[node name="VersionLayer" type="CanvasLayer"]
+
+[node name="VersionLabel" type="Label" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -140.0
+offset_top = -34.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+horizontal_alignment = 2
+vertical_alignment = 1
+text = "v0.0.0"
+modulate = Color(1, 1, 1, 0.6)
+script = ExtResource("1")

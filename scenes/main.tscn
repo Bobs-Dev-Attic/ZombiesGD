@@ -1,8 +1,9 @@
-[gd_scene load_steps=17 format=3 uid="uid://bmainstub001"]
+[gd_scene load_steps=18 format=3 uid="uid://bmainstub001"]
 
 [ext_resource path="res://scripts/main.gd" type="Script" id="1"]
 [ext_resource path="res://scenes/player.tscn" type="PackedScene" id="2"]
 [ext_resource path="res://scripts/zombie_spawner.gd" type="Script" id="3"]
+[ext_resource path="res://scenes/ui/version_label.tscn" type="PackedScene" id="4"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(40, 1, 40)
@@ -133,6 +134,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
 
 [node name="ZombieSpawner" type="Node3D" parent="."]
 script = ExtResource("3")
+
+[node name="VersionLabel" parent="." instance=ExtResource("4")]
 
 [node name="Camera3D" type="Camera3D" parent="."]
 position = Vector3(0, 28, 0)
