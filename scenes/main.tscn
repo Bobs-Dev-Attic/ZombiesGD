@@ -150,11 +150,11 @@ script = ExtResource("3")
 [node name="Crosshair" parent="." instance=ExtResource("8")]
 
 [node name="Camera3D" type="Camera3D" parent="."]
-position = Vector3(0, 28, 0)
-rotation_degrees = Vector3(-90, 0, 0)
+position = Vector3(0, 26, 12)
+rotation_degrees = Vector3(-65, 0, 0)
 current = true
 projection = 1
-size = 22
+size = 30
 far = 100.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
