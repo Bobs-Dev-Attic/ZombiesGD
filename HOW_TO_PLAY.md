@@ -31,7 +31,9 @@ shop; die and you can retry from wave 1.
 | Throw grenade | **G** |
 | Melee | **Automatic** — swings on its own when a zombie is close and in front of you |
 
-Mobile/touch controls are planned but not in yet.
+A crosshair follows your mouse so you can see where you're aiming. Shots show a tracer and
+a spark on hit; zombies flash when hit and burst when they die; grenades explode with a
+visible blast. Mobile/touch controls are planned but not in yet.
 
 ## Your three weapons
 
