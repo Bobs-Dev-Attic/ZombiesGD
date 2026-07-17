@@ -10,8 +10,14 @@ var touch_fire: bool = false
 
 
 func _ready() -> void:
-	# Enable touch path when a touch screen is present or when UI forces it.
-	touch_enabled = DisplayServer.is_touchscreen_available()
+	# touch_enabled intentionally stays false at startup. Detecting touch via
+	# DisplayServer.is_touchscreen_available() would latch it true on any
+	# hybrid/touch-capable desktop or laptop even though the on-screen
+	# joystick doesn't exist yet, silently stranding keyboard/mouse players
+	# with a dead move/fire input (touch_move/touch_fire never populate).
+	# Touch mode should only turn on when the on-screen controls are
+	# actually used, which set_touch_move()/set_touch_fire() already do.
+	pass
 
 
 func set_touch_move(v: Vector2) -> void:
