@@ -21,8 +21,14 @@ extends Node3D
 @export var move_speed_threshold: float = 0.3
 
 ## Playback-speed multiplier applied to the Run animation (zombies will set
-## this below 1.0 to shamble).
+## this below 1.0 to shamble). Multiplies the speed-proportional factor below.
 @export var run_anim_speed_scale: float = 1.0
+
+## Planar speed at which the Run clip plays at its natural (1x) rate before
+## run_anim_speed_scale. Run playback is scaled by planar_speed / this, so the
+## legs keep pace with actual travel instead of skating. Tuned so the player's
+## base move speed (~6) reads as a brisk run rather than a slow walk.
+const RUN_REFERENCE_SPEED: float = 3.5
 
 var _anim_player: AnimationPlayer
 var _mesh: MeshInstance3D
@@ -34,6 +40,10 @@ func _ready() -> void:
 	_mesh = _find_skinned_mesh(self)
 	if _anim_player == null or _mesh == null:
 		push_warning("CharacterAnimator: could not resolve AnimationPlayer and/or skinned MeshInstance3D under %s; animation/skin will not work." % name)
+		# Null both so update_locomotion no-ops cleanly rather than acting on a
+		# half-initialized animator (Idle/loop were never set up here).
+		_anim_player = null
+		_mesh = null
 		return
 	if skin != null:
 		var material := StandardMaterial3D.new()
@@ -50,7 +60,10 @@ func update_locomotion(planar_speed: float) -> void:
 	if planar_speed > move_speed_threshold:
 		if _anim_player.current_animation != &"Run":
 			_anim_player.play(&"Run", 0.15)
-		_anim_player.speed_scale = run_anim_speed_scale
+		# Scale the run cycle to actual travel speed so the legs don't skate;
+		# clamped so a crawl or a big move-speed upgrade stays believable.
+		var travel_factor := clampf(planar_speed / RUN_REFERENCE_SPEED, 0.5, 3.0)
+		_anim_player.speed_scale = travel_factor * run_anim_speed_scale
 	else:
 		if _anim_player.current_animation != &"Idle":
 			_anim_player.play(&"Idle", 0.15)
