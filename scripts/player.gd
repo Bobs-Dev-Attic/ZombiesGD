@@ -18,6 +18,10 @@ var _throw_timer: float = 0.0
 
 const RAY_RANGE: float = 40.0
 const GrenadeScene := preload("res://scenes/grenade.tscn")
+const MuzzleFlashScene := preload("res://scenes/fx/muzzle_flash.tscn")
+const TracerScene := preload("res://scenes/fx/tracer.tscn")
+const ImpactScene := preload("res://scenes/fx/impact.tscn")
+const MeleeArcScene := preload("res://scenes/fx/melee_arc.tscn")
 
 
 func _ready() -> void:
@@ -121,6 +125,7 @@ func _fire() -> void:
 	var origin := _muzzle.global_position
 	var toward := -global_transform.basis.z
 	var tier: int = upgrades.tiers[WeaponStats.Role.RANGED]
+	_spawn_muzzle_flash(origin)
 	for angle_degrees in RangedWeapon.pellet_angles(tier):
 		var pellet_dir := toward.rotated(Vector3.UP, deg_to_rad(angle_degrees))
 		var query := PhysicsRayQueryParameters3D.create(origin, origin + pellet_dir * RAY_RANGE)
@@ -128,10 +133,38 @@ func _fire() -> void:
 		query.collision_mask = WeaponStats.ZOMBIE_COLLISION_MASK
 		var result := space.intersect_ray(query)
 		if result.is_empty():
+			_spawn_tracer(origin, origin + pellet_dir * RAY_RANGE)
 			continue
+		var hit_point: Vector3 = result.position
+		_spawn_tracer(origin, hit_point)
+		_spawn_impact(hit_point)
 		var collider = result.collider
 		if collider and collider.has_method("take_damage"):
 			collider.take_damage(upgrades.damage(WeaponStats.Role.RANGED))
+
+
+## Cosmetic only -- spawned into the current scene (not as a child of the
+## player) so effects don't move/rotate with the player and don't get freed
+## with it. Does not touch hit detection or damage, only reads the ray
+## results _fire() already computed.
+func _spawn_muzzle_flash(origin: Vector3) -> void:
+	var flash := MuzzleFlashScene.instantiate()
+	get_tree().current_scene.add_child(flash)
+	flash.global_position = origin
+	flash.play()
+
+
+func _spawn_tracer(from: Vector3, to: Vector3) -> void:
+	var tracer := TracerScene.instantiate()
+	get_tree().current_scene.add_child(tracer)
+	tracer.setup(from, to)
+
+
+func _spawn_impact(at_point: Vector3) -> void:
+	var impact := ImpactScene.instantiate()
+	get_tree().current_scene.add_child(impact)
+	impact.global_position = at_point
+	impact.play()
 
 
 ## Automatic melee: swings by itself (no button) when a zombie is within
@@ -171,6 +204,20 @@ func _try_melee_swing() -> void:
 			hit_any = true
 	if hit_any:
 		_melee_timer = upgrades.cooldown(WeaponStats.Role.MELEE)
+		_spawn_melee_arc(tier)
+
+
+## Cosmetic only -- spawned into the current scene (not as a child of the
+## player) so it doesn't get freed with a later player death, matching the
+## other _spawn_* fx helpers above. Only called when the swing connected
+## (see _try_melee_swing): a swing at nothing does not consume the cooldown,
+## and per the juice brief the visual follows that same "on connect" rule
+## rather than flashing on every ready-cooldown tick.
+func _spawn_melee_arc(tier: int) -> void:
+	var arc := MeleeArcScene.instantiate()
+	get_tree().current_scene.add_child(arc)
+	arc.global_transform = global_transform
+	arc.setup(MeleeWeapon.reach(tier), MeleeWeapon.arc_degrees(tier))
 
 
 ## Fallback throw distance used when there is no mouse-ray ground point to aim

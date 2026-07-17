@@ -6,6 +6,24 @@ screen) always matches the latest entry here and `scripts/version.gd`.
 Versioning is semantic-ish while pre-1.0: MINOR for a new gameplay system,
 PATCH for fixes and small additions.
 
+## [0.6.0] - 2026-07-17
+
+### Added
+- **Combat feedback ("juice")** — the mechanics always worked, but now you can see them:
+  - **Crosshair** at the mouse (desktop), so you can tell where you're aiming.
+  - **Ranged:** muzzle flash, a tracer per pellet (the shotgun spread now reads), and an
+    impact spark at the hit point.
+  - **Zombies:** flash white when hit, and burst in a death puff instead of silently
+    vanishing.
+  - **Melee:** a visible swing arc when a swing connects (wider for the Axe).
+  - **Grenade:** an expanding explosion flash sized to the blast radius, plus a pop at
+    each bomblet for the Cluster Grenade — throws now land with a visible boom.
+
+### Notes
+- Purely cosmetic: no combat logic, damage, or hit detection changed (verified — the fire
+  and explosion code paths are byte-for-byte unchanged). All effects are procedural
+  primitives; no imported assets.
+
 ## [0.5.0] - 2026-07-17
 
 ### Added

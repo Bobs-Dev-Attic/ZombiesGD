@@ -15,6 +15,7 @@ extends Node3D
 
 const ThrownWeapon := preload("res://scripts/thrown_weapon.gd")
 const WeaponStats := preload("res://scripts/weapon_stats.gd")
+const ExplosionScene := preload("res://scenes/fx/explosion.tscn")
 
 const ARC_HEIGHT: float = 1.5
 
@@ -59,13 +60,26 @@ func _explode() -> void:
 	_launched = false
 	var space := get_world_3d().direct_space_state
 	_damage_in_radius(space, _target, ThrownWeapon.blast_radius(_tier), _full_damage)
+	_spawn_explosion(_target, ThrownWeapon.blast_radius(_tier))
 	if ThrownWeapon.bomblet_count(_tier) > 0:
 		var bomblet_damage := _full_damage * ThrownWeapon.bomblet_damage_fraction()
 		var bomblet_radius := ThrownWeapon.bomblet_radius(_tier)
 		for offset in ThrownWeapon.bomblet_offsets(_tier):
 			var bomblet_center := _target + Vector3(offset.x, 0.0, offset.y)
 			_damage_in_radius(space, bomblet_center, bomblet_radius, bomblet_damage)
+			_spawn_explosion(bomblet_center, bomblet_radius)
 	queue_free()
+
+
+## Cosmetic only -- spawned into the current scene, not as a child of this
+## node, so the effect outlives the grenade's queue_free() right after this
+## returns. Uses get_tree().current_scene (not an autoload/player reference)
+## to keep grenade.gd independent, same as the rest of this script.
+func _spawn_explosion(at_point: Vector3, radius: float) -> void:
+	var fx := ExplosionScene.instantiate()
+	get_tree().current_scene.add_child(fx)
+	fx.global_position = at_point
+	fx.setup(radius)
 
 
 ## Shared shape-query + centre-to-centre distance/falloff logic for both the
