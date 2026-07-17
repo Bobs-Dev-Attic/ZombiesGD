@@ -1,6 +1,7 @@
-[gd_scene load_steps=15 format=3 uid="uid://bmainstub001"]
+[gd_scene load_steps=16 format=3 uid="uid://bmainstub001"]
 
 [ext_resource path="res://scripts/main.gd" type="Script" id="1"]
+[ext_resource path="res://scenes/player.tscn" type="PackedScene" id="2"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(40, 1, 40)
@@ -125,6 +126,9 @@ shape = SubResource("BoxShape3D_cover")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Cover3"]
 mesh = SubResource("BoxMesh_cover")
 surface_material_override/0 = SubResource("StandardMaterial3D_cover")
+
+[node name="Player" parent="." instance=ExtResource("2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
 position = Vector3(0, 28, 0)
