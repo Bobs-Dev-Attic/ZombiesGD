@@ -65,7 +65,7 @@ func _physics_process(delta: float) -> void:
 	_fire_timer = maxf(0.0, _fire_timer - delta)
 	if InputManager.is_fire_held() and _fire_timer <= 0.0:
 		_fire()
-		_fire_timer = upgrades.fire_cooldown()
+		_fire_timer = upgrades.cooldown(WeaponStats.Role.RANGED)
 
 
 func _update_aim(move2: Vector2) -> void:
@@ -103,4 +103,4 @@ func _fire() -> void:
 		return
 	var collider = result.collider
 	if collider and collider.has_method("take_damage"):
-		collider.take_damage(upgrades.damage())
+		collider.take_damage(upgrades.damage(WeaponStats.Role.RANGED))

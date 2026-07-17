@@ -40,6 +40,8 @@ func setup(p_max_hp: float, p_speed: float, fast: bool) -> void:
 
 ## Called by the player's hitscan ray (layer 2) via collider.take_damage(...).
 func take_damage(amount: float) -> void:
+	if hp <= 0.0:
+		return
 	hp = ZombieCombat.apply_damage(hp, amount)
 	if ZombieCombat.is_dead(hp):
 		killed.emit(points_value)
