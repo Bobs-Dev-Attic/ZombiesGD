@@ -21,6 +21,7 @@ const GrenadeScene := preload("res://scenes/grenade.tscn")
 const MuzzleFlashScene := preload("res://scenes/fx/muzzle_flash.tscn")
 const TracerScene := preload("res://scenes/fx/tracer.tscn")
 const ImpactScene := preload("res://scenes/fx/impact.tscn")
+const MeleeArcScene := preload("res://scenes/fx/melee_arc.tscn")
 
 
 func _ready() -> void:
@@ -203,6 +204,20 @@ func _try_melee_swing() -> void:
 			hit_any = true
 	if hit_any:
 		_melee_timer = upgrades.cooldown(WeaponStats.Role.MELEE)
+		_spawn_melee_arc(tier)
+
+
+## Cosmetic only -- spawned into the current scene (not as a child of the
+## player) so it doesn't get freed with a later player death, matching the
+## other _spawn_* fx helpers above. Only called when the swing connected
+## (see _try_melee_swing): a swing at nothing does not consume the cooldown,
+## and per the juice brief the visual follows that same "on connect" rule
+## rather than flashing on every ready-cooldown tick.
+func _spawn_melee_arc(tier: int) -> void:
+	var arc := MeleeArcScene.instantiate()
+	get_tree().current_scene.add_child(arc)
+	arc.global_transform = global_transform
+	arc.setup(MeleeWeapon.reach(tier), MeleeWeapon.arc_degrees(tier))
 
 
 ## Fallback throw distance used when there is no mouse-ray ground point to aim
