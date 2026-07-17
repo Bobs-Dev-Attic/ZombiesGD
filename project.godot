@@ -1,6 +1,10 @@
 ; Engine configuration file.
 config_version=5
 
+[autoload]
+
+InputManager="*res://scripts/input_manager.gd"
+
 [application]
 config/name="ZombieGD"
 run/main_scene="res://scenes/main.tscn"
