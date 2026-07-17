@@ -95,12 +95,15 @@ func _fire() -> void:
 	var space := get_world_3d().direct_space_state
 	var origin := _muzzle.global_position
 	var toward := -global_transform.basis.z
-	var query := PhysicsRayQueryParameters3D.create(origin, origin + toward * RAY_RANGE)
-	query.collide_with_areas = false
-	query.collision_mask = ZOMBIE_MASK
-	var result := space.intersect_ray(query)
-	if result.is_empty():
-		return
-	var collider = result.collider
-	if collider and collider.has_method("take_damage"):
-		collider.take_damage(upgrades.damage(WeaponStats.Role.RANGED))
+	var tier: int = upgrades.tiers[WeaponStats.Role.RANGED]
+	for angle_degrees in RangedWeapon.pellet_angles(tier):
+		var pellet_dir := toward.rotated(Vector3.UP, deg_to_rad(angle_degrees))
+		var query := PhysicsRayQueryParameters3D.create(origin, origin + pellet_dir * RAY_RANGE)
+		query.collide_with_areas = false
+		query.collision_mask = ZOMBIE_MASK
+		var result := space.intersect_ray(query)
+		if result.is_empty():
+			continue
+		var collider = result.collider
+		if collider and collider.has_method("take_damage"):
+			collider.take_damage(upgrades.damage(WeaponStats.Role.RANGED))

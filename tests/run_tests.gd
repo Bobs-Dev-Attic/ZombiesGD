@@ -4,6 +4,7 @@ const TESTS: PackedStringArray = [
 	"res://tests/test_wave_math.gd",
 	"res://tests/test_weapon_stats.gd",
 	"res://tests/test_upgrades.gd",
+	"res://tests/test_ranged_weapon.gd",
 	"res://tests/test_input_manager.gd",
 	"res://tests/test_player.gd",
 	"res://tests/test_zombie.gd",
