@@ -2,6 +2,7 @@ extends SceneTree
 
 const TESTS: PackedStringArray = [
 	"res://tests/test_wave_math.gd",
+	"res://tests/test_wave_state.gd",
 	"res://tests/test_weapon_stats.gd",
 	"res://tests/test_upgrades.gd",
 	"res://tests/test_ranged_weapon.gd",

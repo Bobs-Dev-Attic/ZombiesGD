@@ -4,6 +4,7 @@ config_version=5
 [autoload]
 
 InputManager="*res://scripts/input_manager.gd"
+GameManager="*res://scripts/game_manager.gd"
 
 [application]
 config/name="ZombieGD"
