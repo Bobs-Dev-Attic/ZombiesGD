@@ -11,6 +11,7 @@ signal hp_changed(current: float, maximum: float)
 var upgrades: Upgrades = Upgrades.new()
 var hp: float = 100.0
 var _fire_timer: float = 0.0
+var _melee_timer: float = 0.0
 
 @onready var _muzzle: Marker3D = $Gun/Muzzle
 
@@ -66,6 +67,9 @@ func _physics_process(delta: float) -> void:
 	if InputManager.is_fire_held() and _fire_timer <= 0.0:
 		_fire()
 		_fire_timer = upgrades.cooldown(WeaponStats.Role.RANGED)
+	_melee_timer = maxf(0.0, _melee_timer - delta)
+	if _melee_timer <= 0.0:
+		_try_melee_swing()
 
 
 func _update_aim(move2: Vector2) -> void:
@@ -107,3 +111,42 @@ func _fire() -> void:
 		var collider = result.collider
 		if collider and collider.has_method("take_damage"):
 			collider.take_damage(upgrades.damage(WeaponStats.Role.RANGED))
+
+
+## Automatic melee: swings by itself (no button) when a zombie is within
+## reach and inside the swing arc centred on the player's aim direction.
+## Independent of the ranged cooldown. Only resets its own cooldown when a
+## swing actually connects with at least one zombie — a swing at nothing
+## should not penalize the player with a wasted cooldown.
+func _try_melee_swing() -> void:
+	var tier: int = upgrades.tiers[WeaponStats.Role.MELEE]
+	var reach: float = MeleeWeapon.reach(tier)
+	var space := get_world_3d().direct_space_state
+	var shape := SphereShape3D.new()
+	shape.radius = reach
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = shape
+	query.transform = Transform3D(Basis(), global_position)
+	query.collision_mask = ZOMBIE_MASK
+	query.collide_with_areas = false
+	var results := space.intersect_shape(query)
+	var facing := -global_transform.basis.z
+	var facing_xz := Vector2(facing.x, facing.z)
+	var hit_any := false
+	for result in results:
+		var collider = result.collider
+		if collider == null or not collider.has_method("take_damage"):
+			continue
+		var to_target: Vector3 = collider.global_position - global_position
+		# intersect_shape's narrow-phase can report false positives for a
+		# sphere query against capsule targets well beyond its radius, so
+		# the distance is re-verified explicitly here rather than trusting
+		# the shape query alone for the reach cutoff.
+		if to_target.length() > reach:
+			continue
+		var to_target_xz := Vector2(to_target.x, to_target.z)
+		if MeleeWeapon.is_in_arc(to_target_xz, facing_xz, tier):
+			collider.take_damage(upgrades.damage(WeaponStats.Role.MELEE))
+			hit_any = true
+	if hit_any:
+		_melee_timer = upgrades.cooldown(WeaponStats.Role.MELEE)
