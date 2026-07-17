@@ -80,7 +80,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if _animator != null:
 		_animator.update_locomotion(Vector2(velocity.x, velocity.z).length())
-	_update_aim(move2)
+	_update_aim(move2, delta)
 	_fire_timer = maxf(0.0, _fire_timer - delta)
 	_melee_timer = maxf(0.0, _melee_timer - delta)
 	_throw_timer = maxf(0.0, _throw_timer - delta)
@@ -100,7 +100,13 @@ func _physics_process(delta: float) -> void:
 		_throw_timer = upgrades.cooldown(WeaponStats.Role.THROWN)
 
 
-func _update_aim(move2: Vector2) -> void:
+## Higher = snappier turn; lower = more visible arc. Tuned so the character
+## visibly rotates into a new aim direction instead of snapping instantly.
+const TURN_SHARPNESS: float = 12.0
+
+
+func _update_aim(move2: Vector2, delta: float) -> void:
+	var look: Variant = null
 	if InputManager.use_mouse_aim():
 		var cam := get_viewport().get_camera_3d()
 		if cam == null:
@@ -114,13 +120,25 @@ func _update_aim(move2: Vector2) -> void:
 		if t < 0.0:
 			return
 		var hit := from + dir * t
-		var look := Vector3(hit.x, global_position.y, hit.z)
-		if look.distance_to(global_position) > 0.1:
-			look_at(look, Vector3.UP)
-	else:
-		if move2.length() > 0.1:
-			var look := global_position + Vector3(move2.x, 0.0, move2.y)
-			look_at(look, Vector3.UP)
+		look = Vector3(hit.x, global_position.y, hit.z)
+	elif move2.length() > 0.1:
+		look = global_position + Vector3(move2.x, 0.0, move2.y)
+	if look != null:
+		_face_toward(look, delta)
+
+
+## Smoothly rotate the body toward a look point instead of snapping. Slerps the
+## current basis toward what look_at would produce, so the character turns over
+## a few frames. Weapons fire along the body's facing, so aim naturally follows
+## the turn rather than teleporting to the cursor.
+func _face_toward(look: Vector3, delta: float) -> void:
+	if look.distance_to(global_position) <= 0.1:
+		return
+	var desired := global_transform.looking_at(look, Vector3.UP)
+	var cur_q := global_transform.basis.get_rotation_quaternion()
+	var tgt_q := desired.basis.get_rotation_quaternion()
+	var factor := 1.0 - exp(-TURN_SHARPNESS * delta)
+	global_transform.basis = Basis(cur_q.slerp(tgt_q, factor))
 
 
 func _fire() -> void:
