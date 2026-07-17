@@ -9,7 +9,7 @@ extends Node
 ## Semantic-ish versioning while pre-1.0: MINOR for a new gameplay system
 ## (a weapon role, the wave loop), PATCH for fixes and small additions.
 
-const VERSION: String = "0.6.0"
+const VERSION: String = "0.7.0"
 
 
 ## e.g. "v0.4.0" — what the HUD shows.

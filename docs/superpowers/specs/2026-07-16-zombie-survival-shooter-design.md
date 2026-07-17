@@ -21,7 +21,9 @@ A landscape-orientation, top-down zombie survival shooter for **web and mobile**
 - Multiplayer
 - Multiple weapon types / inventory / ammo management
 - Story, cutscenes, or large open world
-- Imported GLTF character kits
+- ~~Imported GLTF character kits~~ — **revised in v0.7.0**: the player now uses an
+  imported CC0 rigged character (Kenney, GLB). This non-goal was a deliberate v1 scoping
+  choice; it was lifted once the wave loop and combat were complete.
 - iOS-specific polish beyond generic mobile touch (Android/web first)
 
 ## Architecture

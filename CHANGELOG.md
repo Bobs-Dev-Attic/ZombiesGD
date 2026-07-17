@@ -6,6 +6,31 @@ screen) always matches the latest entry here and `scripts/version.gd`.
 Versioning is semantic-ish while pre-1.0: MINOR for a new gameplay system,
 PATCH for fixes and small additions.
 
+## [0.7.0] - 2026-07-17
+
+### Added
+- **Player character model** — the player is now an imported rigged low-poly character
+  (Kenney "Animated Characters 3", CC0) instead of a capsule, with idle/run animation
+  driven by movement speed, and a skin texture.
+- **Camera tilt** — the view is now angled (−65°) instead of straight-down so the
+  character animation is visible.
+- **Smoothed turning** — the player rotates into a new aim direction over a few frames
+  instead of snapping to the cursor.
+
+### Changed
+- The player's collision, hit detection, and weapon behaviour are unchanged — the model
+  is a visual swap over the same capsule collider and muzzle ray origin.
+
+### Known limitations / next
+- Zombies are still capsules (character model coming next).
+- The CC0 pack has only idle/run/jump: no weapon-holding pose, distinct walk, or turn
+  clip, so the arms swing free and don't yet grip a weapon. Richer weapon-aware
+  animation (e.g. retargeted Mixamo clips) is a planned follow-up.
+
+### Assets
+- Added `assets/characters/` (CC0 model, skins, license) and
+  `tools/convert_character_fbx.py` (Blender FBX→GLB conversion, for reproducibility).
+
 ## [0.6.0] - 2026-07-17
 
 ### Added
