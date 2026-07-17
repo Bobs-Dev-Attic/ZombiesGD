@@ -13,6 +13,12 @@ enum Role { RANGED, MELEE, THROWN }
 const TIER_MIN := 1
 const TIER_MAX := 2
 
+## Shared physics collision mask for zombies (collision_layer = 2 in
+## scenes/zombie.tscn). Centralised here so ranged hitscan, melee swings, and
+## thrown blasts all query the same layer instead of each hardcoding a
+## private "2" constant.
+const ZOMBIE_COLLISION_MASK := 2
+
 const _BASE_DAMAGE := {
 	Role.RANGED: {1: 10.0, 2: 6.0},
 	Role.MELEE: {1: 15.0, 2: 30.0},

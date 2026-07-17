@@ -12,11 +12,12 @@ var upgrades: Upgrades = Upgrades.new()
 var hp: float = 100.0
 var _fire_timer: float = 0.0
 var _melee_timer: float = 0.0
+var _throw_timer: float = 0.0
 
 @onready var _muzzle: Marker3D = $Gun/Muzzle
 
 const RAY_RANGE: float = 40.0
-const ZOMBIE_MASK: int = 2
+const GrenadeScene := preload("res://scenes/grenade.tscn")
 
 
 func _ready() -> void:
@@ -70,6 +71,10 @@ func _physics_process(delta: float) -> void:
 	_melee_timer = maxf(0.0, _melee_timer - delta)
 	if _melee_timer <= 0.0:
 		_try_melee_swing()
+	_throw_timer = maxf(0.0, _throw_timer - delta)
+	if InputManager.is_throw_pressed() and _throw_timer <= 0.0:
+		_throw_grenade()
+		_throw_timer = upgrades.cooldown(WeaponStats.Role.THROWN)
 
 
 func _update_aim(move2: Vector2) -> void:
@@ -104,7 +109,7 @@ func _fire() -> void:
 		var pellet_dir := toward.rotated(Vector3.UP, deg_to_rad(angle_degrees))
 		var query := PhysicsRayQueryParameters3D.create(origin, origin + pellet_dir * RAY_RANGE)
 		query.collide_with_areas = false
-		query.collision_mask = ZOMBIE_MASK
+		query.collision_mask = WeaponStats.ZOMBIE_COLLISION_MASK
 		var result := space.intersect_ray(query)
 		if result.is_empty():
 			continue
@@ -127,7 +132,7 @@ func _try_melee_swing() -> void:
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = shape
 	query.transform = Transform3D(Basis(), global_position)
-	query.collision_mask = ZOMBIE_MASK
+	query.collision_mask = WeaponStats.ZOMBIE_COLLISION_MASK
 	query.collide_with_areas = false
 	var results := space.intersect_shape(query)
 	var facing := -global_transform.basis.z
@@ -150,3 +155,49 @@ func _try_melee_swing() -> void:
 			hit_any = true
 	if hit_any:
 		_melee_timer = upgrades.cooldown(WeaponStats.Role.MELEE)
+
+
+## Fallback throw distance used when there is no mouse-ray ground point to aim
+## at (touch/gamepad aiming has a facing direction but no discrete point).
+const THROW_FALLBACK_DISTANCE: float = 6.0
+
+
+## Ground-plane point the player is currently aiming at, using the same
+## camera-ray-to-ground-plane math as _update_aim's mouse-aim branch. Returns
+## null when there is no camera or the ray is parallel to the ground (mouse
+## aim unavailable), so callers can fall back to a facing-direction point.
+func _aim_ground_point() -> Variant:
+	if not InputManager.use_mouse_aim():
+		return null
+	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		return null
+	var screen_pos := InputManager.get_aim_screen_position()
+	var from := cam.project_ray_origin(screen_pos)
+	var dir := cam.project_ray_normal(screen_pos)
+	if absf(dir.y) < 0.0001:
+		return null
+	var t := -(from.y - global_position.y) / dir.y
+	if t < 0.0:
+		return null
+	return from + dir * t
+
+
+## Spawns a grenade at the muzzle, aimed at the current mouse-aim ground
+## point (or, when unavailable — touch/gamepad aiming — a point straight
+## ahead of the player's facing direction). Throwing consumes the cooldown
+## even on a miss; that gating lives in _physics_process, not here.
+func _throw_grenade() -> void:
+	var hit = _aim_ground_point()
+	var target: Vector3
+	if hit == null:
+		var facing := -global_transform.basis.z
+		target = global_position + facing * THROW_FALLBACK_DISTANCE
+	else:
+		target = Vector3(hit.x, global_position.y, hit.z)
+	var tier: int = upgrades.tiers[WeaponStats.Role.THROWN]
+	var full_damage: float = upgrades.damage(WeaponStats.Role.THROWN)
+	var grenade := GrenadeScene.instantiate()
+	get_tree().current_scene.add_child(grenade)
+	grenade.global_position = _muzzle.global_position
+	grenade.launch(_muzzle.global_position, target, tier, full_damage)

@@ -7,6 +7,7 @@ extends Node
 var touch_enabled: bool = false
 var touch_move: Vector2 = Vector2.ZERO
 var touch_fire: bool = false
+var touch_throw: bool = false
 
 
 func _ready() -> void:
@@ -32,6 +33,12 @@ func set_touch_fire(held: bool) -> void:
 		touch_enabled = true
 
 
+func set_touch_throw(pressed: bool) -> void:
+	touch_throw = pressed
+	if pressed:
+		touch_enabled = true
+
+
 func get_move_vector() -> Vector2:
 	if touch_enabled:
 		return normalize_move_vector(touch_move)
@@ -46,6 +53,14 @@ func is_fire_held() -> bool:
 	if touch_enabled:
 		return touch_fire
 	return Input.is_action_pressed("fire")
+
+
+## Just-pressed edge, not a held state -- a grenade throws once per press,
+## not once per physics frame the button is held (unlike is_fire_held()).
+func is_throw_pressed() -> bool:
+	if touch_enabled:
+		return touch_throw
+	return Input.is_action_just_pressed("throw")
 
 
 func use_mouse_aim() -> bool:
