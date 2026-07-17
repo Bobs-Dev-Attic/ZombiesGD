@@ -15,6 +15,7 @@ var _melee_timer: float = 0.0
 var _throw_timer: float = 0.0
 
 @onready var _muzzle: Marker3D = $Gun/Muzzle
+@onready var _animator: CharacterAnimator = $CharacterModel
 
 const RAY_RANGE: float = 40.0
 const GrenadeScene := preload("res://scenes/grenade.tscn")
@@ -77,6 +78,8 @@ func _physics_process(delta: float) -> void:
 	velocity.z = move2.y * speed
 	velocity.y = 0.0
 	move_and_slide()
+	if _animator != null:
+		_animator.update_locomotion(Vector2(velocity.x, velocity.z).length())
 	_update_aim(move2)
 	_fire_timer = maxf(0.0, _fire_timer - delta)
 	_melee_timer = maxf(0.0, _melee_timer - delta)
