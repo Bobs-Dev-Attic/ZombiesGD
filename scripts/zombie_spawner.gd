@@ -35,5 +35,16 @@ func spawn_wave(wave: int) -> void:
 		z.killed.connect(_on_killed)
 
 
+## Removes every zombie from the current wave. Disconnects `killed` BEFORE
+## freeing: queue_free() is deferred, so a zombie could otherwise take a
+## killing hit between this call and its actual removal and still decrement
+## GameManager's alive count for the NEW wave.
+func clear_wave() -> void:
+	for child in get_children():
+		if child.has_signal("killed") and child.killed.is_connected(_on_killed):
+			child.killed.disconnect(_on_killed)
+		child.queue_free()
+
+
 func _on_killed(points: int) -> void:
 	GameManager.notify_zombie_killed(points)

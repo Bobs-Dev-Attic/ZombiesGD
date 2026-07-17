@@ -41,13 +41,35 @@ var points: int = 0
 var upgrades: Upgrades = Upgrades.new()
 var alive_zombies: int = 0
 
+## The player's starting transform, captured the first time a run starts (main.gd
+## calls start_run() a frame after _ready, before the player can have moved).
+## Captured rather than hardcoded so it tracks scenes/main.tscn instead of
+## duplicating its spawn point here.
+var _player_spawn: Vector3 = Vector3.ZERO
+var _player_spawn_captured: bool = false
 
-## Resets the run to a fresh state and starts wave 1.
+
+## Resets the run to a fresh state and starts wave 1. This is also the retry
+## entry point after GAME_OVER, so it must leave nothing behind: zombies still
+## alive from the previous run would otherwise stay parented to the spawner and
+## decrement the NEW wave's alive count when killed, clearing it early.
 func start_run() -> void:
+	var player := get_tree().get_first_node_in_group("player")
+	if player is Node3D:
+		if not _player_spawn_captured:
+			_player_spawn = (player as Node3D).global_position
+			_player_spawn_captured = true
+	var spawner := get_tree().get_first_node_in_group("spawner")
+	if spawner and spawner.has_method("clear_wave"):
+		spawner.clear_wave()
 	upgrades.reset()
 	points = 0
 	wave = 0
 	alive_zombies = 0
+	if player and player.has_method("apply_upgrades"):
+		player.apply_upgrades(upgrades)
+	if player and player.has_method("reset_for_run"):
+		player.reset_for_run(_player_spawn)
 	points_changed.emit(points)
 	run_reset.emit()
 	begin_next_wave()
@@ -73,7 +95,10 @@ func notify_zombie_killed(n: int) -> void:
 func buy_upgrade_player(stat: Upgrades.PlayerStat) -> void:
 	if state != State.SHOP:
 		return
+	var before := points
 	points = upgrades.try_buy_player(stat, points)
+	if points == before:
+		return
 	points_changed.emit(points)
 	_apply_upgrades_to_player()
 
@@ -82,7 +107,10 @@ func buy_upgrade_player(stat: Upgrades.PlayerStat) -> void:
 func buy_upgrade_weapon(role: WeaponStats.Role, stat: Upgrades.WeaponStat) -> void:
 	if state != State.SHOP:
 		return
+	var before := points
 	points = upgrades.try_buy_weapon(role, stat, points)
+	if points == before:
+		return
 	points_changed.emit(points)
 	_apply_upgrades_to_player()
 
@@ -91,7 +119,10 @@ func buy_upgrade_weapon(role: WeaponStats.Role, stat: Upgrades.WeaponStat) -> vo
 func buy_upgrade_tier(role: WeaponStats.Role) -> void:
 	if state != State.SHOP:
 		return
+	var before := points
 	points = upgrades.try_buy_tier(role, points)
+	if points == before:
+		return
 	points_changed.emit(points)
 	_apply_upgrades_to_player()
 

@@ -56,6 +56,16 @@ func take_damage(amount: float) -> void:
 		died.emit()
 
 
+## Full reset for a fresh run: HP back to max and body returned to its spawn
+## point. Called by GameManager.start_run() so a retry does not begin with the
+## player still dead where they fell.
+func reset_for_run(spawn: Vector3) -> void:
+	global_position = spawn
+	velocity = Vector3.ZERO
+	hp = upgrades.max_hp()
+	hp_changed.emit(hp, upgrades.max_hp())
+
+
 func _physics_process(delta: float) -> void:
 	var move2: Vector2 = InputManager.get_move_vector()
 	var speed: float = upgrades.move_speed()
