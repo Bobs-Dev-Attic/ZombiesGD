@@ -1,0 +1,4 @@
+# Godot 4 generated import cache / editor state
+.godot/
+# Machine-local MCP server config (contains absolute GODOT_PATH)
+.mcp.json
